@@ -300,7 +300,28 @@ Beautifier.prototype.beautify = function() {
       last_tag_token = parser_token;
     } else if ((raw_token.type === TOKEN.ATTRIBUTE || raw_token.type === TOKEN.EQUALS || raw_token.type === TOKEN.VALUE) ||
       (raw_token.type === TOKEN.TEXT && !last_tag_token.tag_complete)) {
-      parser_token = this._handle_inside_tag(printer, raw_token, last_tag_token, tokens);
+      var buffer_token=[];
+      var buffer_char_length=0;
+      buffer_token.push(raw_token);
+      buffer_char_length+=raw_token.text.length
+      raw_token = tokens.next();
+      while ((raw_token.type === TOKEN.ATTRIBUTE || raw_token.type === TOKEN.EQUALS || raw_token.type === TOKEN.VALUE) ||
+        (raw_token.type === TOKEN.TEXT && !last_tag_token.tag_complete)) {
+          buffer_token.push(raw_token);
+          buffer_char_length+=raw_token.text.length
+          raw_token = tokens.next();
+        }
+      var max_attr_count = 3;
+      buffer_char_length += 4 * printer.indent_level + printer.alignment_size + buffer_token.length - 4;
+      if (buffer_token.length>11 || buffer_char_length > printer._output.wrap_line_length) {
+        max_attr_count=1;
+      }
+      var arrayLength = buffer_token.length;
+      for (var i = 0; i < arrayLength; i++) {
+        parser_token = this._handle_inside_tag(printer, buffer_token[i], last_tag_token, tokens, max_attr_count);
+      }
+      last_token = parser_token;
+      continue;
     } else if (raw_token.type === TOKEN.TAG_CLOSE) {
       parser_token = this._handle_tag_close(printer, raw_token, last_tag_token);
     } else if (raw_token.type === TOKEN.TEXT) {
@@ -326,14 +347,21 @@ Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_t
   };
   printer.alignment_size = 0;
   last_tag_token.tag_complete = true;
-
-  printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '', true);
+  // emilkholod
+  // printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '', true);
   if (last_tag_token.is_unformatted) {
     printer.add_raw_token(raw_token);
   } else {
     if (last_tag_token.tag_start_char === '<') {
-      printer.set_space_before_token(raw_token.text[0] === '/', true); // space before />, no space before >
+      // emilkholod
+      // printer.set_space_before_token(raw_token.text[0] === '/', true); // space before />, no space before >
+      if (raw_token.text[0] === '/' && last_tag_token.has_wrapped_attrs) {
+        printer.print_newline(false);
+      }
       if (this._is_wrap_attributes_force_expand_multiline && last_tag_token.has_wrapped_attrs) {
+        printer.print_newline(false);
+      }
+      if (raw_token.text[0] === '>' && last_tag_token.has_wrapped_attrs) {
         printer.print_newline(false);
       }
     }
@@ -357,7 +385,7 @@ Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_t
   return parser_token;
 };
 
-Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_token, tokens) {
+Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_token, tokens, max_attr_count) {
   var wrapped = last_tag_token.has_wrapped_attrs;
   var parser_token = {
     text: raw_token.text,
@@ -393,7 +421,7 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
 
 
       if (this._is_wrap_attributes_force) {
-        var force_attr_wrap = last_tag_token.attr_count > 1;
+        var force_attr_wrap = last_tag_token.attr_count > max_attr_count;
         if (this._is_wrap_attributes_force_expand_multiline && last_tag_token.attr_count === 1) {
           var is_only_attribute = true;
           var peek_index = 0;
@@ -407,7 +435,7 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
             peek_index += 1;
           } while (peek_index < 4 && peek_token.type !== TOKEN.EOF && peek_token.type !== TOKEN.TAG_CLOSE);
 
-          force_attr_wrap = !is_only_attribute;
+          // force_attr_wrap = !is_only_attribute;
         }
 
         if (force_attr_wrap) {
