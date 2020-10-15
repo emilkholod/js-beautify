@@ -292,6 +292,7 @@ Beautifier.prototype.beautify = function() {
   this._tag_stack = new TagStack(printer);
 
   var parser_token = null;
+  var saved_wrap_line_length=this._options.wrap_line_length;
   var raw_token = tokens.next();
   while (raw_token.type !== TOKEN.EOF) {
 
@@ -312,11 +313,15 @@ Beautifier.prototype.beautify = function() {
           raw_token = tokens.next();
         }
       var max_attr_count = 3;
-      buffer_char_length += 4 * printer.indent_level + printer.alignment_size + buffer_token.length - 4;
-      if (buffer_token.length>11 || buffer_char_length > printer._output.wrap_line_length) {
+      var arrayLength = buffer_token.length;
+      buffer_char_length += 4 * printer.indent_level + printer.alignment_size + arrayLength - 3;
+      if (arrayLength>11 || buffer_char_length > this._options.wrap_line_length) {
         max_attr_count=1;
       }
-      var arrayLength = buffer_token.length;
+      saved_wrap_line_length=this._options.wrap_line_length;
+      if (arrayLength==3) {
+        printer._output.wrap_line_length=9999;
+      }
       for (var i = 0; i < arrayLength; i++) {
         parser_token = this._handle_inside_tag(printer, buffer_token[i], last_tag_token, tokens, max_attr_count);
       }
@@ -324,6 +329,7 @@ Beautifier.prototype.beautify = function() {
       continue;
     } else if (raw_token.type === TOKEN.TAG_CLOSE) {
       parser_token = this._handle_tag_close(printer, raw_token, last_tag_token);
+      printer._output.wrap_line_length=saved_wrap_line_length;
     } else if (raw_token.type === TOKEN.TEXT) {
       parser_token = this._handle_text(printer, raw_token, last_tag_token);
     } else {
