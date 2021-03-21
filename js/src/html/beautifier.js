@@ -303,19 +303,23 @@ Beautifier.prototype.beautify = function() {
       (raw_token.type === TOKEN.TEXT && !last_tag_token.tag_complete)) {
       var buffer_token=[];
       var buffer_char_length=0;
+      var newlines_in_attr=false;
       buffer_token.push(raw_token);
-      buffer_char_length+=raw_token.text.length
+      buffer_char_length+=raw_token.text.length;
       raw_token = tokens.next();
       while ((raw_token.type === TOKEN.ATTRIBUTE || raw_token.type === TOKEN.EQUALS || raw_token.type === TOKEN.VALUE) ||
         (raw_token.type === TOKEN.TEXT && !last_tag_token.tag_complete)) {
           buffer_token.push(raw_token);
           buffer_char_length+=raw_token.text.length
           raw_token = tokens.next();
+          if (raw_token.text.match(/\n/g)) {
+            newlines_in_attr=true;
+          }
         }
       var max_attr_count = 3;
       var arrayLength = buffer_token.length;
       buffer_char_length += 4 * printer.indent_level + printer.alignment_size + arrayLength - 3;
-      if (arrayLength>11 || buffer_char_length > this._options.wrap_line_length) {
+      if (arrayLength>11 || buffer_char_length > this._options.wrap_line_length || newlines_in_attr) {
         max_attr_count=1;
       }
       saved_wrap_line_length=this._options.wrap_line_length;
