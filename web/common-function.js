@@ -10,7 +10,7 @@ var the = {
 
 requirejs.config({
   //By default load any module IDs from js/lib
-  baseUrl: 'js/lib',
+  baseUrl: 'js/lib_for_io',
   paths: {
     'beautifier': the.beautifier_file
   }
@@ -70,21 +70,21 @@ function read_settings_from_cookie() {
   $('#tabsize').val(any(Cookies.get('tabsize'), '4'));
   $('#brace-style').val(any(Cookies.get('brace-style'), 'collapse'));
   $('#detect-packers').prop('checked', Cookies.get('detect-packers') !== 'off');
-  $('#max-preserve-newlines').val(any(Cookies.get('max-preserve-newlines'), '5'));
+  $('#max-preserve-newlines').val(any(Cookies.get('max-preserve-newlines'), '10'));
   $('#keep-array-indentation').prop('checked', Cookies.get('keep-array-indentation') === 'on');
   $('#break-chained-methods').prop('checked', Cookies.get('break-chained-methods') === 'on');
   $('#indent-scripts').val(any(Cookies.get('indent-scripts'), 'normal'));
-  $('#additional-options').val(any(Cookies.get('additional-options'), '{}'));
+  $('#additional-options').val(any(Cookies.get('additional-options'), '{"wrap-attributes": "force-aligned"}'));
   $('#space-before-conditional').prop('checked', Cookies.get('space-before-conditional') !== 'off');
-  $('#wrap-line-length').val(any(Cookies.get('wrap-line-length'), '0'));
+  $('#wrap-line-length').val(any(Cookies.get('wrap-line-length'), '120'));
   $('#unescape-strings').prop('checked', Cookies.get('unescape-strings') === 'on');
   $('#jslint-happy').prop('checked', Cookies.get('jslint-happy') === 'on');
   $('#end-with-newline').prop('checked', Cookies.get('end-with-newline') === 'on');
   $('#indent-inner-html').prop('checked', Cookies.get('indent-inner-html') === 'on');
   $('#comma-first').prop('checked', Cookies.get('comma-first') === 'on');
   $('#e4x').prop('checked', Cookies.get('e4x') === 'on');
-  $('#language').val(any(Cookies.get('language'), 'js'));
-  $('#indent-empty-lines').prop('checked', Cookies.get('indent-empty-lines') === 'on');
+  $('#language').val(any(Cookies.get('language'), 'html'));
+  $('#indent-empty-lines').prop('checked', Cookies.get('indent-empty-lines') === 'off');
 }
 
 function store_settings_to_cookie() {
