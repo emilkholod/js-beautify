@@ -450,6 +450,23 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
         }
       }
     }
+    if (raw_token.type === TOKEN.VALUE) {
+      var lines=raw_token.text.split("\n");
+      var count_spaces = (lines[[lines.length - 1]].match(/ /g)||[]).length;
+      var extra_spaces = count_spaces - (4 * printer.indent_level + printer.alignment_size);
+      if (extra_spaces > 0) {
+        for (var i = 0; i < lines.length; i++) {
+          if ((lines[i].substring(0,extra_spaces).match(/ /g)||[]).length == extra_spaces) {
+            lines[i] = lines[i].substring(extra_spaces);
+          }
+        }
+      } else {
+        for (var i = 1; i < lines.length; i++) {
+          lines[i] = " ".repeat(-extra_spaces) + lines[i];
+        }
+      }
+      raw_token.text = lines.join("\n");
+    }
     printer.print_token(raw_token);
     wrapped = wrapped || printer.previous_token_wrapped();
     last_tag_token.has_wrapped_attrs = wrapped;
