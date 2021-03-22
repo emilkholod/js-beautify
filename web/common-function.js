@@ -74,7 +74,7 @@ function read_settings_from_cookie() {
   $('#keep-array-indentation').prop('checked', Cookies.get('keep-array-indentation') === 'on');
   $('#break-chained-methods').prop('checked', Cookies.get('break-chained-methods') === 'on');
   $('#indent-scripts').val(any(Cookies.get('indent-scripts'), 'normal'));
-  $('#additional-options').val(any(Cookies.get('additional-options'), '{"wrap-attributes": "force-aligned"}'));
+  $('#additional-options').val(any(Cookies.get('additional-options'), '{"wrap-attributes": "force-aligned", "end_with_newline": true}'));
   $('#space-before-conditional').prop('checked', Cookies.get('space-before-conditional') !== 'off');
   $('#wrap-line-length').val(any(Cookies.get('wrap-line-length'), '120'));
   $('#unescape-strings').prop('checked', Cookies.get('unescape-strings') === 'on');

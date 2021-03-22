@@ -1,5 +1,5 @@
 {
-  "name": "js-beautify",
+  "name": "xml-beautify-guidelines",
   "version": "1.13.6",
   "description": "beautifier.io for node",
   "main": "js/index.js",
@@ -64,7 +64,7 @@
     "mustache": "^4.0.1",
     "requirejs": "^2.3.6",
     "serve": "^11.3.2",
-    "webpack": "^4.44.1",
+    "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12"
   }
 }
