@@ -456,17 +456,34 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
     }
     if (raw_token.type === TOKEN.VALUE) {
       var lines=raw_token.text.split("\n");
-      var count_spaces = (lines[[lines.length - 1]].match(/ /g)||[]).length;
-      var extra_spaces = count_spaces - (4 * printer.indent_level + printer.alignment_size);
-      if (extra_spaces > 0) {
-        for (var i = 0; i < lines.length; i++) {
-          if ((lines[i].substring(0,extra_spaces).match(/ /g)||[]).length == extra_spaces) {
-            lines[i] = lines[i].substring(extra_spaces);
+      if (["{", "[", "("].includes(lines[0].slice(-1)) && lines[0].length == 2) {
+        let count_indent=1;
+        let next_line=lines[1].replace(/^\s\s*/, "").replace(/\s\s*$/, "");
+        for (var i = 1; i < lines.length-1; i++) {
+          let present_line=next_line;
+          next_line=lines[i+1].replace(/^\s\s*/, "").replace(/\s\s*$/, "");
+          lines[i] = " ".repeat(
+            4 * printer.indent_level + printer.alignment_size + count_indent * 4
+          ) + present_line;
+          if (["{", "[", "("].includes(present_line.slice(-1))) {
+            count_indent+=1;
+          } else if (["}", "]", ")"].includes(next_line.slice(0, 1))) {
+            count_indent-=1;
           }
         }
       } else {
-        for (var i = 1; i < lines.length; i++) {
-          lines[i] = " ".repeat(-extra_spaces) + lines[i];
+        var count_spaces = lines[[lines.length - 1]].replace(/\s\s*$/, "").search(/\S/);
+        var extra_spaces = count_spaces - (4 * printer.indent_level + printer.alignment_size);
+        if (extra_spaces > 0) {
+          for (var i = 0; i < lines.length; i++) {
+            if (lines[i].replace(/\s\s*$/, "").search(/\S/) >= extra_spaces) {
+              lines[i] = lines[i].substring(extra_spaces);
+            }
+          }
+        } else {
+          for (var i = 1; i < lines.length; i++) {
+            lines[i] = " ".repeat(-extra_spaces) + lines[i];
+          }
         }
       }
       raw_token.text = lines.join("\n");
@@ -489,7 +506,12 @@ Beautifier.prototype._handle_text = function(printer, raw_token, last_tag_token)
     printer.add_raw_token(raw_token);
   } else {
     printer.traverse_whitespace(raw_token);
+    if (raw_token.previous.type==="TK_TAG_CLOSE") {
+      this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size;
+    }
+    printer.alignment_size+=raw_token.whitespace_before.length-this.extra_whitespace;
     printer.print_token(raw_token);
+    printer.alignment_size-=raw_token.whitespace_before.length-this.extra_whitespace;
   }
   return parser_token;
 };
