@@ -459,9 +459,11 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
       if (["{", "[", "("].includes(lines[0].slice(-1)) && lines[0].length == 2) {
         let count_indent=1;
         let next_line=lines[1].replace(/^\s\s*/, "").replace(/\s\s*$/, "");
-        for (var i = 1; i < lines.length-1; i++) {
+        for (var i = 1; i < lines.length; i++) {
           let present_line=next_line;
-          next_line=lines[i+1].replace(/^\s\s*/, "").replace(/\s\s*$/, "");
+          if (i<lines.length-1) {
+            next_line=lines[i+1].replace(/^\s\s*/, "").replace(/\s\s*$/, "");
+          }
           lines[i] = " ".repeat(
             4 * printer.indent_level + printer.alignment_size + count_indent * 4
           ) + present_line;
