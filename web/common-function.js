@@ -89,7 +89,7 @@ function read_settings_from_cookie() {
 
 function store_settings_to_cookie() {
   var opts = {
-    expires: 360
+    expires: 1
   };
   Cookies.set('tabsize', $('#tabsize').val(), opts);
   Cookies.set('brace-style', $('#brace-style').val(), opts);
@@ -181,7 +181,7 @@ function beautify() {
   opts.space_before_conditional = $('#space-before-conditional').prop('checked');
   opts.unescape_strings = $('#unescape-strings').prop('checked');
   opts.jslint_happy = $('#jslint-happy').prop('checked');
-  opts.end_with_newline = $('#end-with-newline').prop('checked');
+  opts.end_with_newline = true;
   opts.wrap_line_length = $('#wrap-line-length').val();
   opts.indent_inner_html = $('#indent-inner-html').prop('checked');
   opts.comma_first = $('#comma-first').prop('checked');
