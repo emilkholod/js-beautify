@@ -112,7 +112,7 @@ test_cli_js_beautify()
         cleanup 1
     }
 
-    node $SCRIPT_DIR/../lib/cli.js $SCRIPT_DIR/../bin/js-beautify.js | diff $SCRIPT_DIR/../bin/js-beautify.js - || {
+    node $SCRIPT_DIR/../src/cli.js $SCRIPT_DIR/../bin/js-beautify.js | diff $SCRIPT_DIR/../bin/js-beautify.js - || {
         echo "js-beautify output for $SCRIPT_DIR/../bin/js-beautify.js was expected to be unchanged."
         cleanup 1
     }
