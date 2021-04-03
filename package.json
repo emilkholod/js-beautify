@@ -1,5 +1,5 @@
 {
-  "name": "xml-beautify-guidelines",
+  "name": "js-beautify",
   "version": "1.13.6",
   "description": "beautifier.io for node",
   "main": "js/index.js",
