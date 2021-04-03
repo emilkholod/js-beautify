@@ -509,15 +509,17 @@ Beautifier.prototype._handle_text = function(printer, raw_token, last_tag_token)
   } else {
     printer.traverse_whitespace(raw_token);
     if (raw_token.previous.type==="TK_TAG_CLOSE") {
-        if (raw_token.whitespace_before.length!=0) {
+        this.extra_whitespace=NaN;
+        if (raw_token.whitespace_before.length!=0 && raw_token.newlines) {
           this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size;
-        } else {
-          this.extra_whitespace = 0;
         }
     } else if (raw_token.next.type==="TK_TAG_OPEN") {
-      if (raw_token.next.whitespace_before.length===0) {
+      if (!raw_token.next.newlines) {
         this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size + this._options.indent_size;
       }
+    }
+    if (isNaN(this.extra_whitespace) && raw_token.newlines) {
+        this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size;
     }
     let old_printer_alignment_size = printer.alignment_size;
     printer.alignment_size+=raw_token.whitespace_before.length-this.extra_whitespace;
@@ -525,7 +527,7 @@ Beautifier.prototype._handle_text = function(printer, raw_token, last_tag_token)
     printer.alignment_size=old_printer_alignment_size;
 
     if (raw_token.previous.type==="TK_TAG_CLOSE") {
-      if (raw_token.whitespace_before.length==0) {
+      if (raw_token.whitespace_before.length==0 && !raw_token.newlines) {
         this.extra_whitespace = raw_token.next.whitespace_before.length - printer.alignment_size;
       }
     }
