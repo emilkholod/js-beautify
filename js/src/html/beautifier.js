@@ -318,7 +318,7 @@ Beautifier.prototype.beautify = function() {
         }
       var max_attr_count = 3;
       var arrayLength = buffer_token.length;
-      buffer_char_length += 4 * printer.indent_level + printer.alignment_size + arrayLength - 3;
+      buffer_char_length += this._options.indent_size * printer.indent_level + printer.alignment_size + arrayLength - 3;
       if (arrayLength>11 || buffer_char_length > this._options.wrap_line_length || newlines_in_attr) {
         max_attr_count=1;
       }
@@ -465,7 +465,7 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
             next_line=lines[i+1].replace(/^\s\s*/, "").replace(/\s\s*$/, "");
           }
           lines[i] = " ".repeat(
-            4 * printer.indent_level + printer.alignment_size + count_indent * 4
+            this._options.indent_size * printer.indent_level + printer.alignment_size + count_indent * this._options.indent_size
           ) + present_line;
           if (["{", "[", "("].includes(present_line.slice(-1))) {
             count_indent+=1;
@@ -475,7 +475,7 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
         }
       } else {
         var count_spaces = lines[[lines.length - 1]].replace(/\s\s*$/, "").search(/\S/);
-        var extra_spaces = count_spaces - (4 * printer.indent_level + printer.alignment_size);
+        var extra_spaces = count_spaces - (this._options.indent_size * printer.indent_level + printer.alignment_size);
         if (extra_spaces > 0) {
           for (var i = 0; i < lines.length; i++) {
             if (lines[i].replace(/\s\s*$/, "").search(/\S/) >= extra_spaces) {
@@ -509,11 +509,26 @@ Beautifier.prototype._handle_text = function(printer, raw_token, last_tag_token)
   } else {
     printer.traverse_whitespace(raw_token);
     if (raw_token.previous.type==="TK_TAG_CLOSE") {
-      this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size;
+        if (raw_token.whitespace_before.length!=0) {
+          this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size;
+        } else {
+          this.extra_whitespace = 0;
+        }
+    } else if (raw_token.next.type==="TK_TAG_OPEN") {
+      if (raw_token.next.whitespace_before.length===0) {
+        this.extra_whitespace = raw_token.whitespace_before.length - printer.alignment_size + this._options.indent_size;
+      }
     }
+    let old_printer_alignment_size = printer.alignment_size;
     printer.alignment_size+=raw_token.whitespace_before.length-this.extra_whitespace;
     printer.print_token(raw_token);
-    printer.alignment_size-=raw_token.whitespace_before.length-this.extra_whitespace;
+    printer.alignment_size=old_printer_alignment_size;
+
+    if (raw_token.previous.type==="TK_TAG_CLOSE") {
+      if (raw_token.whitespace_before.length==0) {
+        this.extra_whitespace = raw_token.next.whitespace_before.length - printer.alignment_size;
+      }
+    }
   }
   return parser_token;
 };
