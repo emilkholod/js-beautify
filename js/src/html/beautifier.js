@@ -312,7 +312,7 @@ Beautifier.prototype.beautify = function() {
           buffer_token.push(raw_token);
           buffer_char_length+=raw_token.text.length
           raw_token = tokens.next();
-          if (raw_token.text.match(/\n/g)) {
+          if (raw_token.text.match(/\n/g) || raw_token.newlines) {
             newlines_in_attr=true;
           }
         }
